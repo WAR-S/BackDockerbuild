@@ -1,15 +1,15 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.BuildRequest;
+import com.example.demo.model.BuildResponse;
 import com.example.demo.service.DockerBuildService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.Consumes;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @RestController
@@ -25,8 +25,13 @@ public class DockerBuildController {
     }
 
 
-    @PostMapping(value = "/build",produces = APPLICATION_OCTET_STREAM_VALUE)
-    public byte[] buildResponse(@RequestBody BuildRequest buildRequest) {
-         return dockerBuildService.build(buildRequest);
+    @PostMapping(value = "/build",produces = MediaType.APPLICATION_JSON_VALUE)
+    public BuildResponse build(@RequestBody BuildRequest buildRequest) {
+         return dockerBuildService.registerBuild(buildRequest);
+    }
+
+    @GetMapping(value = "/status/{name}/{tag}",produces = MediaType.APPLICATION_JSON_VALUE)
+    public BuildResponse status(@PathVariable String name, @PathVariable String tag) {
+        return dockerBuildService.getStatus(name,tag);
     }
 }
