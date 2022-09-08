@@ -15,8 +15,8 @@ spring:
     initialization-mode: always
     continue-on-error: true
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database: postgresql

@@ -2,6 +2,7 @@ package com.example.demo.domain;
 
 import com.example.demo.model.BuildStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,12 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "build")
+@Table(name = "build",
+        indexes = {
+                @Index(columnList = "name,tag", name = "Index_build"),
+                @Index(columnList = "status", name = "Index_status")
+        })
+@Builder
 public class BuildEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

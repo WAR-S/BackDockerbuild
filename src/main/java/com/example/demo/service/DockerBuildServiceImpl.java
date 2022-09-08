@@ -34,10 +34,18 @@ public class DockerBuildServiceImpl implements DockerBuildService {
         try {
             writeToDisk(buildRequest.getName() + "__" + buildRequest.getTag() + ".dockerfile", buildRequest.getDockerManifest());
             buildRepository.save(new BuildEntity(null, buildRequest.getName(), buildRequest.getTag(), BuildStatus.REGISTER, Timestamp.valueOf(LocalDateTime.now())));
-            return new BuildResponse(buildRequest.getName(), buildRequest.getTag(), BuildStatus.REGISTER);
+            return BuildResponse.builder()
+                    .name(buildRequest.getName())
+                    .tag(buildRequest.getTag())
+                    .status(BuildStatus.REGISTER)
+                    .build();
         } catch (Exception e) {
             log.error(e.getMessage());
-            return new BuildResponse(buildRequest.getName(), buildRequest.getTag(), BuildStatus.FAILED);
+            return BuildResponse.builder()
+                    .name(buildRequest.getName())
+                    .tag(buildRequest.getTag())
+                    .status(BuildStatus.FAILED)
+                    .build();
         }
     }
 
@@ -66,8 +74,12 @@ public class DockerBuildServiceImpl implements DockerBuildService {
 
     @Override
     public BuildResponse getStatus(String name, String tag) {
-        BuildEntity buildEntity = buildRepository.findAll(Sort.by(Sort.Direction.DESC, "creationDate")).get(0);
-        return new BuildResponse(buildEntity.getName(), buildEntity.getTag(), buildEntity.getStatus());
+        BuildEntity buildEntity = buildRepository.findByNameAndTag(name,tag,Sort.by(Sort.Direction.DESC, "creationDate")).get(0);
+        return BuildResponse.builder()
+                .name(buildEntity.getName())
+                .tag(buildEntity.getTag())
+                .status(buildEntity.getStatus())
+                .build();
     }
 
     @Override
@@ -82,8 +94,8 @@ public class DockerBuildServiceImpl implements DockerBuildService {
 
 
     public void writeToDisk(String name, String dockerManifest) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(name));
-        writer.write(dockerManifest);
-        writer.close();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(name))) {
+            writer.write(dockerManifest);
+        }
     }
 }
