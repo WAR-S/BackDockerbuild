@@ -5,7 +5,7 @@ import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.core.DockerClientBuilder;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.*;
 
 @Component
 public class DockerAPIClient {
@@ -18,6 +18,9 @@ public class DockerAPIClient {
                 .awaitImageId();
         dockerClient.tagImageCmd(id, name, tag).exec();
         return id;
-//        return dockerClient.saveImageCmd(name+":"+tag).exec().readAllBytes();
+    }
+
+    public byte[] saveAndGetImage(String name, String tag) throws IOException {
+        return dockerClient.saveImageCmd(name + ":" + tag).exec().readAllBytes();
     }
 }

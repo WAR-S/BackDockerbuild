@@ -12,10 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +32,7 @@ public class DockerBuildServiceImpl implements DockerBuildService {
     public BuildResponse registerBuild(BuildRequest buildRequest) {
 
         try {
-            writeToDisk(buildRequest.getName()+"__"+buildRequest.getTag()+".dockerfile", buildRequest.getDockerManifest());
+            writeToDisk(buildRequest.getName() + "__" + buildRequest.getTag() + ".dockerfile", buildRequest.getDockerManifest());
             buildRepository.save(new BuildEntity(null, buildRequest.getName(), buildRequest.getTag(), BuildStatus.REGISTER, Timestamp.valueOf(LocalDateTime.now())));
             return new BuildResponse(buildRequest.getName(), buildRequest.getTag(), BuildStatus.REGISTER);
         } catch (Exception e) {
@@ -56,10 +53,10 @@ public class DockerBuildServiceImpl implements DockerBuildService {
             try {
                 String imageId = dockerAPIClient.build(item.getName(), item.getTag(), new File(item.getName() + "__" + item.getTag() + ".dockerfile"));
                 item.setStatus(BuildStatus.SUCCESS);
-                log.info("build successful {}:{}. ImageId: {}",item.getName(),item.getTag(),imageId);
+                log.info("build successful {}:{}. ImageId: {}", item.getName(), item.getTag(), imageId);
             } catch (Exception e) {
                 item.setStatus(BuildStatus.FAILED);
-                log.error("build failed {}:{}. Message: {}",item.getName(),item.getTag(),e.getMessage());
+                log.error("build failed {}:{}. Message: {}", item.getName(), item.getTag(), e.getMessage());
             }
             buildRepository.save(item);
         }));
@@ -68,9 +65,19 @@ public class DockerBuildServiceImpl implements DockerBuildService {
     }
 
     @Override
-    public BuildResponse getStatus(String name,String tag) {
-        BuildEntity buildEntity = buildRepository.findAll(Sort.by(Sort.Direction.DESC,"creationDate")).get(0);
-        return new BuildResponse(buildEntity.getName(),buildEntity.getTag(),buildEntity.getStatus());
+    public BuildResponse getStatus(String name, String tag) {
+        BuildEntity buildEntity = buildRepository.findAll(Sort.by(Sort.Direction.DESC, "creationDate")).get(0);
+        return new BuildResponse(buildEntity.getName(), buildEntity.getTag(), buildEntity.getStatus());
+    }
+
+    @Override
+    public byte[] getFile(String name, String tag) {
+        try {
+            return dockerAPIClient.saveAndGetImage(name, tag);
+        } catch (IOException e) {
+            log.error("Error while getting image file with name: {} and tag: {} : {}", name, tag, e.getMessage());
+            return null;
+        }
     }
 
 

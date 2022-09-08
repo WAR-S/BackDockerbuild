@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.Consumes;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @RestController
@@ -25,13 +24,18 @@ public class DockerBuildController {
     }
 
 
-    @PostMapping(value = "/build",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/build", produces = MediaType.APPLICATION_JSON_VALUE)
     public BuildResponse build(@RequestBody BuildRequest buildRequest) {
-         return dockerBuildService.registerBuild(buildRequest);
+        return dockerBuildService.registerBuild(buildRequest);
     }
 
-    @GetMapping(value = "/status/{name}/{tag}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/status/{name}/{tag}", produces = MediaType.APPLICATION_JSON_VALUE)
     public BuildResponse status(@PathVariable String name, @PathVariable String tag) {
-        return dockerBuildService.getStatus(name,tag);
+        return dockerBuildService.getStatus(name, tag);
+    }
+
+    @GetMapping(value = "/get/{name}/{tag}", produces = APPLICATION_OCTET_STREAM_VALUE)
+    public byte[] getFile(@PathVariable String name, @PathVariable String tag) {
+        return dockerBuildService.getFile(name, tag);
     }
 }
