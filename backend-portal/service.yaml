@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: docker-backend
+  name: docker-backend
+  namespace: docker-backend
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 9999
+  selector:
+    app: docker-backend
+  type: ClusterIP
+status:
+  loadBalancer: {}

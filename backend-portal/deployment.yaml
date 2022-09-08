@@ -1,0 +1,32 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: docker-backend
+  namespace: docker-backend
+spec:
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: docker-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: docker-backend
+    spec:
+      containers:
+      - name: docker-backend
+        image: war1s/back-portal:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 9999
+      imagePullSecrets:
+      - name: docker-io

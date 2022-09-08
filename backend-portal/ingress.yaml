@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docker-backend
+  namespace: docker-backend
+spec:
+  rules:
+  - host: docker.apps.wars
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: docker-backend
+            port:
+              number: 80
